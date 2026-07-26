@@ -1,0 +1,34 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Docker-compose runtime data (bind mounts)
+filestore/
+postgresql/
+
+# Backups / dumps
+*.zip
+*.dump
+*.sql.gz
+
+# Python / Odoo artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+.venv/
+venv/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
