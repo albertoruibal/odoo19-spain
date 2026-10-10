@@ -4,8 +4,8 @@ This directory contains a Docker Compose setup for an **Odoo 19 Community**
 instance tailored to **Spanish accounting** (`l10n_es_aeat` and related OCA
 modules from [OCA/l10n-spain](https://github.com/OCA/l10n-spain)).
 
-It is a self-contained deployment: a `postgres:18` database service and a
-custom `odoo:19` image that bakes in the OCA addons, the Odoo config file and
+It is a self-contained deployment: a `postgres:18.6` database service and a
+custom `odoo:19.0-20260926` image that bakes in the OCA addons, the Odoo config file and
 a set of in-container helper scripts for installing modules and performing
 post-install maintenance.
 

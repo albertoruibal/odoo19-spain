@@ -1,4 +1,4 @@
-FROM odoo:19
+FROM odoo:19.0-20260926
 
 USER root
 RUN apt-get update \
