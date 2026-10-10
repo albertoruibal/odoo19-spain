@@ -31,6 +31,7 @@ odoo19/
     ├── 02_install_accounting.sh
     ├── 03_add_accounting_groups.sh
     ├── 04_fix_product_unit_precision.sh
+    ├── 05_backup_db.sh
     └── 99_pay_invoices.sh
 ```
 
@@ -121,6 +122,7 @@ The shared bootstrap lives in `docker/scripts/_odoo_shell.py` and provides:
 | 02 | `scripts/02_install_accounting.sh` | `install_accounting.py` | Installs the OCA reporting modules: `report_xlsx`, `account_financial_report`. Idempotent. |
 | 03 | `scripts/03_add_accounting_groups.sh` | `add_accounting_groups.py` | Grants `account.group_account_readonly` and `account.group_account_user` to the `ODOO_USER` so the full accounting UI (Chart of Accounts, Journals, Journal Items, Post button, reports) is visible in Odoo 19 Community, where it is gated behind groups not exposed by default. Then restarts the stack. Supports `--dry-run` and `--target-login`. |
 | 04 | `scripts/04_fix_product_unit_precision.sh` | *(inline `psql`)* | Sets the `Product Unit` decimal precision to 3 digits via `psql` so re-imported invoice quantities (e.g. `0.666`, `0.904`) keep full precision instead of rounding to 2 dp. Mirrors Settings ▸ Technical ▸ Decimal Accuracy ▸ Product Unit ▸ Digits = 3. |
+| 05 | `scripts/05_backup_db.sh` | *(inline `pg_dump`)* | Writes a full logical backup of `ODOO_DB` to `backup/<db>_<timestamp>.dump` (pg_dump custom format). The `backup/` folder is gitignored. |
 | 99 | `scripts/99_pay_invoices.sh` | `pay_invoices.py` | Registers a bank payment (journal `BNK1` by default) for every posted, unpaid `out_invoice`/`in_invoice`, dated the same as the invoice and processed oldest first. One payment per invoice for 1:1 reconciliation. Supports `--dry-run`, `--limit N`, `--journal-code`, `--move-types`. |
 
 ### Running a helper directly
@@ -152,6 +154,13 @@ Common flags accepted by the Python helpers:
 - The OCA addons are cloned at build time (branch `19.0`) into `/opt/oca-addons`
   inside the image and registered in `addons_path`. To pick up upstream changes,
   rebuild the image with `docker compose build odoo19`.
+
+## Backing up
+
+Run `./scripts/05_backup_db.sh` to write a full logical dump of `ODOO_DB` to
+`backup/<db>_<timestamp>.dump` (pg_dump custom format). The `backup/` folder is
+gitignored. Note this dumps the database only; the Odoo filestore lives in the
+bind-mounted `filestore/` directory.
 
 ## Restoring a backup
 
