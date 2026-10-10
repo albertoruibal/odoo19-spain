@@ -26,11 +26,12 @@ odoo19/
 │       └── pay_invoices.py
 ├── filestore/            # Odoo data dir (bind mount, persisted)
 ├── postgresql/           # PostgreSQL data dir (bind mount, persisted)
-├── 01_install_aeat_modules.sh
-├── 02_install_accounting.sh
-├── 03_add_accounting_groups.sh
-├── 04_fix_product_unit_precision.sh
-└── 99_pay_invoices.sh
+└── scripts/              # host-side setup scripts
+    ├── 01_install_aeat_modules.sh
+    ├── 02_install_accounting.sh
+    ├── 03_add_accounting_groups.sh
+    ├── 04_fix_product_unit_precision.sh
+    └── 99_pay_invoices.sh
 ```
 
 ## Quick start
@@ -45,10 +46,10 @@ odoo19/
 3. Wait for Odoo to come up, then create a company via the web UI and then run the setup scripts in order:
 
    ```bash
-   ./01_install_aeat_modules.sh
-   ./02_install_accounting.sh
-   ./03_add_accounting_groups.sh
-   ./04_fix_product_unit_precision.sh
+   ./scripts/01_install_aeat_modules.sh
+   ./scripts/02_install_accounting.sh
+   ./scripts/03_add_accounting_groups.sh
+   ./scripts/04_fix_product_unit_precision.sh
    ```
 
 4. Odoo is reachable on http://localhost:10019 (longpolling on :20019).
@@ -116,11 +117,11 @@ The shared bootstrap lives in `docker/scripts/_odoo_shell.py` and provides:
 
 | # | Shell script | Python helper | What it does |
 |---|---|---|---|
-| 01 | `01_install_aeat_modules.sh` | `install_aeat_modules.py` | Installs the AEAT modules: `l10n_es_aeat`, `l10n_es_aeat_mod130`, `l10n_es_aeat_mod303`, `l10n_es_aeat_mod349`, `l10n_es_aeat_mod390`. Idempotent — skips modules already installed. |
-| 02 | `02_install_accounting.sh` | `install_accounting.py` | Installs the OCA reporting modules: `report_xlsx`, `account_financial_report`. Idempotent. |
-| 03 | `03_add_accounting_groups.sh` | `add_accounting_groups.py` | Grants `account.group_account_readonly` and `account.group_account_user` to the `ODOO_USER` so the full accounting UI (Chart of Accounts, Journals, Journal Items, Post button, reports) is visible in Odoo 19 Community, where it is gated behind groups not exposed by default. Then restarts the stack. Supports `--dry-run` and `--target-login`. |
-| 04 | `04_fix_product_unit_precision.sh` | *(inline `psql`)* | Sets the `Product Unit` decimal precision to 3 digits via `psql` so re-imported invoice quantities (e.g. `0.666`, `0.904`) keep full precision instead of rounding to 2 dp. Mirrors Settings ▸ Technical ▸ Decimal Accuracy ▸ Product Unit ▸ Digits = 3. |
-| 99 | `99_pay_invoices.sh` | `pay_invoices.py` | Registers a bank payment (journal `BNK1` by default) for every posted, unpaid `out_invoice`/`in_invoice`, dated the same as the invoice and processed oldest first. One payment per invoice for 1:1 reconciliation. Supports `--dry-run`, `--limit N`, `--journal-code`, `--move-types`. |
+| 01 | `scripts/01_install_aeat_modules.sh` | `install_aeat_modules.py` | Installs the AEAT modules: `l10n_es_aeat`, `l10n_es_aeat_mod130`, `l10n_es_aeat_mod303`, `l10n_es_aeat_mod349`, `l10n_es_aeat_mod390`. Idempotent — skips modules already installed. |
+| 02 | `scripts/02_install_accounting.sh` | `install_accounting.py` | Installs the OCA reporting modules: `report_xlsx`, `account_financial_report`. Idempotent. |
+| 03 | `scripts/03_add_accounting_groups.sh` | `add_accounting_groups.py` | Grants `account.group_account_readonly` and `account.group_account_user` to the `ODOO_USER` so the full accounting UI (Chart of Accounts, Journals, Journal Items, Post button, reports) is visible in Odoo 19 Community, where it is gated behind groups not exposed by default. Then restarts the stack. Supports `--dry-run` and `--target-login`. |
+| 04 | `scripts/04_fix_product_unit_precision.sh` | *(inline `psql`)* | Sets the `Product Unit` decimal precision to 3 digits via `psql` so re-imported invoice quantities (e.g. `0.666`, `0.904`) keep full precision instead of rounding to 2 dp. Mirrors Settings ▸ Technical ▸ Decimal Accuracy ▸ Product Unit ▸ Digits = 3. |
+| 99 | `scripts/99_pay_invoices.sh` | `pay_invoices.py` | Registers a bank payment (journal `BNK1` by default) for every posted, unpaid `out_invoice`/`in_invoice`, dated the same as the invoice and processed oldest first. One payment per invoice for 1:1 reconciliation. Supports `--dry-run`, `--limit N`, `--journal-code`, `--move-types`. |
 
 ### Running a helper directly
 

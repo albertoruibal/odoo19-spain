@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")"
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 set -a; . ./.env; set +a
 
 docker compose exec -e ODOO_DB -e ODOO_USER odoo19 \

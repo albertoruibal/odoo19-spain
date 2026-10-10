@@ -4,7 +4,7 @@
 # Mirrors the UI change: Settings > Technical > Decimal Accuracy > "Product Unit" > Digits=3.
 
 set -euo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")"
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 set -a; . ./.env; set +a
 
 docker compose exec -e PGPASSWORD="$POSTGRES_PASSWORD" db psql -U "$POSTGRES_USER" -d "$ODOO_DB" -c \
