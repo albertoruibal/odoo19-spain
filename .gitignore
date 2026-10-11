@@ -33,3 +33,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+/docs/
+
+# Ad-hoc invoice booking scripts (quarterly, not for the repo)
+/mobialia/

@@ -31,7 +31,8 @@ odoo19/
     ├── 02_install_accounting.sh
     ├── 03_add_accounting_groups.sh
     ├── 04_fix_product_unit_precision.sh
-    ├── 05_backup_db.sh
+    ├── 05_show_invoice_origin.sh
+    ├── 98_backup_db.sh
     └── 99_pay_invoices.sh
 ```
 
@@ -91,7 +92,7 @@ ODOO_PASSWORD=<application user password>
 ## Helper scripts
 
 The numbered shell scripts in this directory wrap `docker exec` calls into the
-running `odoo19-odoo19-1` container. They source `.env` and run the matching
+running `odoo-spain-odoo19-1` container. They source `.env` and run the matching
 Python helper from `/opt/scripts/` inside the container.
 
 ### How the Python helpers work
@@ -122,7 +123,8 @@ The shared bootstrap lives in `docker/scripts/_odoo_shell.py` and provides:
 | 02 | `scripts/02_install_accounting.sh` | `install_accounting.py` | Installs the OCA reporting modules: `report_xlsx`, `account_financial_report`. Idempotent. |
 | 03 | `scripts/03_add_accounting_groups.sh` | `add_accounting_groups.py` | Grants `account.group_account_readonly` and `account.group_account_user` to the `ODOO_USER` so the full accounting UI (Chart of Accounts, Journals, Journal Items, Post button, reports) is visible in Odoo 19 Community, where it is gated behind groups not exposed by default. Then restarts the stack. Supports `--dry-run` and `--target-login`. |
 | 04 | `scripts/04_fix_product_unit_precision.sh` | *(inline `psql`)* | Sets the `Product Unit` decimal precision to 3 digits via `psql` so re-imported invoice quantities (e.g. `0.666`, `0.904`) keep full precision instead of rounding to 2 dp. Mirrors Settings ▸ Technical ▸ Decimal Accuracy ▸ Product Unit ▸ Digits = 3. |
-| 05 | `scripts/05_backup_db.sh` | *(inline `pg_dump`)* | Writes a full logical backup of `ODOO_DB` to `backup/<db>_<timestamp>.dump` (pg_dump custom format). The `backup/` folder is gitignored. |
+| 05 | `scripts/05_show_invoice_origin.sh` | *(inline `ir.ui.view`)* | Makes "Source Document" (`invoice_origin`, e.g. an order ref) visible and editable on the vendor-bill form next to "Bill Reference". Odoo 19 ships the field `invisible` (and model-readonly) on `account.move.form`; this creates/extensions the `account.move.form.show_invoice_origin_vendor` inherit view to show it for `in_invoice`/`in_refund`/`in_receipt` and hides the stock copy in the sales group. Idempotent — removes any previous copy of the view first. |
+| 98 | `scripts/98_backup_db.sh` | *(inline `pg_dump`)* | Writes a full logical backup of `ODOO_DB` to `backup/<db>_<timestamp>.dump` (pg_dump custom format). The `backup/` folder is gitignored. |
 | 99 | `scripts/99_pay_invoices.sh` | `pay_invoices.py` | Registers a bank payment (journal `BNK1` by default) for every posted, unpaid `out_invoice`/`in_invoice`, dated the same as the invoice and processed oldest first. One payment per invoice for 1:1 reconciliation. Supports `--dry-run`, `--limit N`, `--journal-code`, `--move-types`. |
 
 ### Running a helper directly
@@ -131,7 +133,7 @@ You can invoke any helper inside the container without the shell wrapper, e.g.
 for a dry run of the payment script:
 
 ```bash
-docker exec -e ODOO_DB=<your-db-name> odoo19-odoo19-1 \
+docker exec -e ODOO_DB=<your-db-name> odoo-spain-odoo19-1 \
     python3 /opt/scripts/pay_invoices.py --db <your-db-name> --dry-run --limit 10
 ```
 
@@ -157,7 +159,7 @@ Common flags accepted by the Python helpers:
 
 ## Backing up
 
-Run `./scripts/05_backup_db.sh` to write a full logical dump of `ODOO_DB` to
+Run `./scripts/98_backup_db.sh` to write a full logical dump of `ODOO_DB` to
 `backup/<db>_<timestamp>.dump` (pg_dump custom format). The `backup/` folder is
 gitignored. Note this dumps the database only; the Odoo filestore lives in the
 bind-mounted `filestore/` directory.
