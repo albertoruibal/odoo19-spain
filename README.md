@@ -52,6 +52,15 @@ odoo19/
    ./scripts/02_install_accounting.sh
    ./scripts/03_add_accounting_groups.sh
    ./scripts/04_fix_product_unit_precision.sh
+   ./scripts/05_show_invoice_origin.sh
+   ```
+
+   Both operational scripts are optional and safe to run any time (see
+   [Scripts](#scripts)):
+
+   ```bash
+   ./scripts/98_backup_db.sh      # logical pg_dump into backup/
+   ./scripts/99_pay_invoices.sh   # register BNK1 payments for unpaid invoices
    ```
 
 4. Odoo is reachable on http://localhost:10019 (longpolling on :20019).
@@ -172,5 +181,6 @@ manager):
 1. Start the stack: `docker compose up -d --build`.
 2. Open http://localhost:10019/web/database/manager and use **Restore Database**
    with the `ADMIN_PASSWORD` from `.env`.
-3. Run the helper scripts `01`–`04` to ensure all modules and accounting groups
-   are in place for the restored database.
+3. Run the helper scripts `01`–`05` to ensure all modules, accounting groups and
+   the vendor-bill form tweak are in place for the restored database. Scripts
+   `98` (backup) and `99` (payments) are operational and can be run as needed.
